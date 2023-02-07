@@ -162,6 +162,66 @@ var mocks = map[string]func() mock.MockBackendOption{
 			}),
 		)
 	},
+	"GetFileContent": func() mock.MockBackendOption {
+		return mock.WithRequestMatch(
+			mock.GetReposContentsByOwnerByRepoByPath,
+			github.RepositoryContent{
+				Name: github.String("pull_request_template.md"),
+				Path: github.String(".github/pull_request_template.md"),
+				SHA:  github.String("a1b2c3d4e5f6g7h8i9j0"),
+			},
+		)
+	},
+	"GetFileContent_404": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.GetReposContentsByOwnerByRepoByPath,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusNotFound, "404 Not Found")
+			}),
+		)
+	},
+	"GetFileContent_400": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.GetReposContentsByOwnerByRepoByPath,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
+			}),
+		)
+	},
+	"CreateFileContent": func() mock.MockBackendOption {
+		return mock.WithRequestMatch(
+			mock.PutReposContentsByOwnerByRepoByPath,
+			github.RepositoryContent{
+				Name: github.String("pull_request_template.md"),
+				Path: github.String(".github/pull_request_template.md"),
+			},
+		)
+	},
+	"CreateFileContent_400": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.PutReposContentsByOwnerByRepoByPath,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
+			}),
+		)
+	},
+	"UpdateFileContent": func() mock.MockBackendOption {
+		return mock.WithRequestMatch(
+			mock.PutReposContentsByOwnerByRepoByPath,
+			github.RepositoryContent{
+				Name: github.String("pull_request_template.md"),
+				Path: github.String(".github/pull_request_template.md"),
+			},
+		)
+	},
+	"UpdateFileContent_400": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.PutReposContentsByOwnerByRepoByPath,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
+			}),
+		)
+	},
 }
 
 func TestTemplateLocalFileNotFound(t *testing.T) {
@@ -544,6 +604,118 @@ func TestErrorUpdatingRepoTopics(t *testing.T) {
 		Template: "./testing/simple-repo.json",
 		Branches: []string{"main"},
 		Topics:   []string{"topic1", "topic2"},
+	}
+
+	_, err := Run(rt, opts)
+
+	assert.NotNil(t, err)
+	err = errors.Unwrap(err)
+	assert.IsType(t, &github.ErrorResponse{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
+}
+
+func TestCreateContentFile(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent_404"](),
+		mocks["CreateFileContent"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
+	}
+
+	res, err := Run(rt, opts)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "leocomelli/ght", res.Fullname)
+	assert.Equal(t, false, res.Created)
+}
+
+func TestErrorCreatingContentFile(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent_404"](),
+		mocks["CreateFileContent_400"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
+	}
+
+	_, err := Run(rt, opts)
+
+	assert.NotNil(t, err)
+	err = errors.Unwrap(err)
+	assert.IsType(t, &github.ErrorResponse{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
+}
+
+func TestErrorGettingFileContent(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent_400"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
+	}
+
+	_, err := Run(rt, opts)
+
+	assert.NotNil(t, err)
+	err = errors.Unwrap(err)
+	assert.IsType(t, &github.ErrorResponse{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
+}
+
+func TestUpdateContentFile(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent"](),
+		mocks["UpdateFileContent"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
+	}
+
+	res, err := Run(rt, opts)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "leocomelli/ght", res.Fullname)
+	assert.Equal(t, false, res.Created)
+}
+
+func TestErrorUpdatingContentFile(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent"](),
+		mocks["UpdateFileContent_400"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
 	}
 
 	_, err := Run(rt, opts)

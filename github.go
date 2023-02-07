@@ -187,3 +187,41 @@ func (r *RepoTemplate) ReplaceTopics(owner, repo string, topics []string) error 
 
 	return nil
 }
+
+// CreateUpdateContent creates or updates a file in a repository.
+//
+// Github API docs: https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents
+// Github API docs: https://docs.github.com/en/rest/reference/repos#update-a-file
+func (r *RepoTemplate) CreateUpdateContent(owner, repo, path string, content []byte) error {
+	ctx := context.Background()
+
+	getOpts := &github.RepositoryContentGetOptions{
+		Ref: "main",
+	}
+	res, _, _, err := r.client.Repositories.GetContents(ctx, owner, repo, ".github/pull_request_template.md", getOpts)
+	if err != nil && err.(*github.ErrorResponse).Response.StatusCode != http.StatusNotFound {
+		return fmt.Errorf("failed to get file %s/%s/%s |→ %w", owner, repo, path, err)
+	}
+
+	opts := &github.RepositoryContentFileOptions{
+		Message: github.String("Add/Update Pull Request Template"),
+		Content: content,
+	}
+
+	if res != nil && res.SHA != nil {
+		_, _, err := r.client.Repositories.UpdateFile(ctx, owner, repo, path, opts)
+
+		if err != nil {
+			return fmt.Errorf("failed to update file %s/%s/%s |→ %w", owner, repo, path, err)
+		}
+
+		return nil
+	}
+
+	_, _, err = r.client.Repositories.CreateFile(ctx, owner, repo, path, opts)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s/%s/%s |→ %w", owner, repo, path, err)
+	}
+
+	return nil
+}

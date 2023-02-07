@@ -69,6 +69,17 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 		}
 	}
 
+	if cfg.PullRequestTemplate != "" {
+		prTmplData, err := Data(cfg.PullRequestTemplate)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := rt.CreateUpdateContent(opts.Owner, opts.Name, ".github/pull_request_template.md", prTmplData); err != nil {
+			return nil, err
+		}
+	}
+
 	return res, nil
 }
 
