@@ -209,6 +209,8 @@ func (r *RepoTemplate) CreateUpdateContent(owner, repo, path string, content []b
 	}
 
 	if res != nil && res.SHA != nil {
+		opts.SHA = res.SHA
+
 		_, _, err := r.client.Repositories.UpdateFile(ctx, owner, repo, path, opts)
 
 		if err != nil {

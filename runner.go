@@ -62,13 +62,7 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 		}
 	}
 
-	// Update branch protection rules
-	if cfg.BranchProtection != nil {
-		if err := rt.BranchProtectionRules(opts.Owner, opts.Name, opts.Branches, cfg.BranchProtection, cfg.RequiredSignedCommits); err != nil {
-			return nil, err
-		}
-	}
-
+	// Configure issue templates
 	if cfg.PullRequestTemplate != "" {
 		prTmplData, err := Data(cfg.PullRequestTemplate)
 		if err != nil {
@@ -76,6 +70,13 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 		}
 
 		if err := rt.CreateUpdateContent(opts.Owner, opts.Name, ".github/pull_request_template.md", prTmplData); err != nil {
+			return nil, err
+		}
+	}
+
+	// Update branch protection rules
+	if cfg.BranchProtection != nil {
+		if err := rt.BranchProtectionRules(opts.Owner, opts.Name, opts.Branches, cfg.BranchProtection, cfg.RequiredSignedCommits); err != nil {
 			return nil, err
 		}
 	}
