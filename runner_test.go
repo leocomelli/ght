@@ -18,11 +18,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.GetReposByOwnerByRepo,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusInternalServerError,
-					"500 Internal Server Error",
-				)
+				mock.WriteError(w, http.StatusInternalServerError, "500 Internal Server Error")
 			}),
 		)
 	},
@@ -30,11 +26,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.GetReposByOwnerByRepo,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusNotFound,
-					"404 Not Found",
-				)
+				mock.WriteError(w, http.StatusNotFound, "404 Not Found")
 			}),
 		)
 	},
@@ -58,15 +50,21 @@ var mocks = map[string]func() mock.MockBackendOption{
 			},
 		)
 	},
+	"CreateRepoUser": func() mock.MockBackendOption {
+		return mock.WithRequestMatch(
+			mock.PostUserRepos,
+			github.Repository{
+				Name:        github.String("ght"),
+				Description: github.String("A simple CLI to create GitHub repositories"),
+			},
+		)
+	},
+
 	"CreateRepo_400": func() mock.MockBackendOption {
 		return mock.WithRequestMatchHandler(
 			mock.PostOrgsReposByOrg,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusBadRequest,
-					"400 Bad Request",
-				)
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -84,11 +82,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.PostReposGenerateByTemplateOwnerByTemplateRepo,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusBadRequest,
-					"400 Bad Request",
-				)
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -96,11 +90,15 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.PutReposTopicsByOwnerByRepo,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusOK,
-					"200 OK",
-				)
+				mock.WriteError(w, http.StatusOK, "200 OK")
+			}),
+		)
+	},
+	"ReplaceTopics_400": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.PutReposTopicsByOwnerByRepo,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -108,11 +106,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.GetOrgsByOrg,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusOK,
-					"200 OK",
-				)
+				mock.WriteError(w, http.StatusOK, "200 OK")
 			}),
 		)
 	},
@@ -120,11 +114,15 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.GetOrgsByOrg,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusNotFound,
-					"404 Not Found",
-				)
+				mock.WriteError(w, http.StatusNotFound, "404 Not Found")
+			}),
+		)
+	},
+	"GetOrg_400": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.GetOrgsByOrg,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -146,11 +144,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.PutReposBranchesProtectionByOwnerByRepoByBranch,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusBadRequest,
-					"400 Bad Request",
-				)
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -164,11 +158,7 @@ var mocks = map[string]func() mock.MockBackendOption{
 		return mock.WithRequestMatchHandler(
 			mock.PostReposBranchesProtectionRequiredSignaturesByOwnerByRepoByBranch,
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				mock.WriteError(
-					w,
-					http.StatusBadRequest,
-					"400 Bad Request",
-				)
+				mock.WriteError(w, http.StatusBadRequest, "400 Bad Request")
 			}),
 		)
 	},
@@ -268,8 +258,6 @@ func TestInternalServerErrorWhenGetRepo(t *testing.T) {
 func TestGetRepo(t *testing.T) {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mocks["GetRepo"](),
-		mocks["ReplaceTopics"](),
-		mocks["GetOrg_404"](),
 	)
 
 	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
@@ -317,6 +305,30 @@ func TestCreateSimpleRepo(t *testing.T) {
 		Owner:    "leocomelli",
 		Name:     "ght",
 		Template: "./testing/simple-repo.json",
+		Topics:   []string{"topic1", "topic2"},
+	}
+
+	res, err := Run(rt, opts)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "leocomelli/ght", res.Fullname)
+	assert.Equal(t, true, res.Created)
+}
+
+func TestCreateSimpleUserRepo(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo_404"](),
+		mocks["GetOrg_404"](),
+		mocks["CreateRepoUser"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/simple-repo.json",
+		Branches: []string{"main"},
+		Debug:    true,
 	}
 
 	res, err := Run(rt, opts)
@@ -507,6 +519,31 @@ func TestErrorCreatingRepoWithBranchProtectionAndSignedCommit(t *testing.T) {
 		Name:     "ght",
 		Template: "./testing/repo-branch-protection-complete.json",
 		Branches: []string{"main"},
+	}
+
+	_, err := Run(rt, opts)
+
+	assert.NotNil(t, err)
+	err = errors.Unwrap(err)
+	assert.IsType(t, &github.ErrorResponse{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
+}
+
+func TestErrorUpdatingRepoTopics(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo_404"](),
+		mocks["CreateRepo"](),
+		mocks["GetOrg"](),
+		mocks["ReplaceTopics_400"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/simple-repo.json",
+		Branches: []string{"main"},
+		Topics:   []string{"topic1", "topic2"},
 	}
 
 	_, err := Run(rt, opts)

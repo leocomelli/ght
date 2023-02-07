@@ -56,8 +56,10 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 	}
 
 	// Replace topics
-	if err := rt.ReplaceTopics(opts.Owner, opts.Name, opts.Topics); err != nil {
-		return nil, err
+	if opts.Topics != nil && len(opts.Topics) > 0 {
+		if err := rt.ReplaceTopics(opts.Owner, opts.Name, opts.Topics); err != nil {
+			return nil, err
+		}
 	}
 
 	// Update branch protection rules
