@@ -83,4 +83,6 @@ The `pull_request_template` could be a local or remote file, as well as the `iss
 
 The ght ensure that some settings will be applied when a repository is created or updated, whereas the GitHub feature is similar to forking a repository. In general, the ght is about settings and the GitHub feature is about branches and directory structure.
 To get more information, read the documentation: [Creating a repository from a template
-](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
+](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+
+Don't forget we can use ght and GitHub feature together (check [here](https://github.com/leocomelli/ght/blob/main/testing/simple-repo-template.json)).
