@@ -1,8 +1,8 @@
 # ght
 
-ght (GitHub Template) helps us to create or maintain a repository according to some standard settings. We must use a JSON file to configure the repository settings, the JSON format is the same as that is used by the [GitHub REST API](https://docs.github.com/en/rest?apiVersion=2022-11-28).
+ght (GitHub Template) helps us create or maintain a repository according to some standard settings. We must use a JSON file to configure the repository settings, the JSON format is the same as that used by the [GitHub REST API](https://docs.github.com/en/rest?apiVersion=2022-11-28).
 
-The configurations supported are:
+The supported settings are:
 
 1. [Create an organization repository](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-an-organization-repository);
 2. [Create a repository for the authenticated user](https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user);
@@ -25,7 +25,7 @@ There are some parameters that must be provided as CLI flags:
   -h, --help                 help for repo
   -n, --name string          the name of the repository
   -o, --owner string         the name of the owner, can be an organization or an authenticated user
-  -t, --template string      the name of the JSON file contains the template, can be a local or remote file
+  -t, --template string      the name of the JSON file that contains the template, can be a local or remote file
   -l, --topics strings       an array of topics to add to the repository
 ```
 
@@ -81,8 +81,8 @@ The `pull_request_template` could be a local or remote file, as well as the `iss
 
 ## ght _vs_ GitHub feature (create from a template)
 
-The ght ensure that some settings will be applied when a repository is created or updated, whereas the GitHub feature is similar to forking a repository. In general, the ght is about settings and the GitHub feature is about branches and directory structure.
+The ght ensures that some settings will be applied when a repository is created or updated, whereas the GitHub feature is similar to forking a repository. In general, the ght is about settings and the GitHub feature is about branches and directory structure.
 To get more information, read the documentation: [Creating a repository from a template
 ](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
 
-Don't forget we can use ght and GitHub feature together (check [here](https://github.com/leocomelli/ght/blob/main/testing/simple-repo-template.json)).
+Don't forget we can use ght and GitHub features together (check [here](https://github.com/leocomelli/ght/blob/main/testing/simple-repo-template.json)).
