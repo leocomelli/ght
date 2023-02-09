@@ -14,6 +14,9 @@ The supported settings are:
 8. [Create a PR template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository);
 9. [Create an Issue template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/manually-creating-a-single-issue-template-for-your-repository);
 
+## Installation
+Go binaries are automatically built with each release by [GoReleaser](https://github.com/goreleaser/goreleaser). These can be accessed on the GitHub [releases page](https://github.com/leocomelli/ght/releases) for this project.
+
 ## CLI flags
 
 There are some parameters that must be provided as CLI flags:
