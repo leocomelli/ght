@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test-build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Go 1.19
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.19.5'
+
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Go lint
+      uses: golangci/golangci-lint-action@v3
+
+    - name: Test
+      run: go test -v -cover
+
+    - name: Build
+      run: go build -o ./dist/ght
