@@ -64,15 +64,13 @@ func command() *cobra.Command {
 
 	root := &cobra.Command{
 		Use:   "ght",
-		Short: "",
-		Long:  ``,
+		Short: "ght is a CLI tool for creating a new repository based on the template",
 	}
 
 	repo := &cobra.Command{
 		Use:     "repo",
 		Aliases: []string{"r", "repository"},
 		Short:   "Create a new repository based on the template",
-		// Example: getExample,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			debugMode(opts)
 
