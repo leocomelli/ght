@@ -79,11 +79,11 @@ func command() *cobra.Command {
 	}
 
 	repo.Flags().StringVarP(&opts.Name, "name", "n", "", "the name of the repository")
-	repo.Flags().StringVarP(&opts.Owner, "owner", "o", "", "the owner name, it is not case sensitive")
+	repo.Flags().StringVarP(&opts.Owner, "owner", "o", "", "the name of the owner, can be an organization or an authenticated user")
 	repo.Flags().StringVarP(&opts.Description, "description", "d", "", "a short description of the repository")
 	repo.Flags().StringSliceVarP(&opts.Topics, "topics", "l", []string{}, "an array of topics to add to the repository")
-	repo.Flags().StringSliceVarP(&opts.Branches, "branches", "b", []string{}, "an array of branches to add to the repository")
-	repo.Flags().StringVarP(&opts.Template, "template", "t", "", "the name of the JSON file containing the template")
+	repo.Flags().StringSliceVarP(&opts.Branches, "branches", "b", []string{}, "the names of the branches to which the protection rules will be applied")
+	repo.Flags().StringVarP(&opts.Template, "template", "t", "", "the name of the JSON file contains the template, can be a local or remote file")
 	repo.Flags().BoolVarP(&opts.Debug, "debug", "v", false, "enable debug mode")
 
 	_ = repo.MarkFlagRequired("owner")
