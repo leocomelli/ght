@@ -681,7 +681,7 @@ func TestErrorGettingFileContent(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
 }
 
-func TestUpdateContentFile(t *testing.T) {
+func TestUpdatePullRequestTemplate(t *testing.T) {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mocks["GetRepo"](),
 		mocks["GetFileContent"](),
@@ -703,7 +703,29 @@ func TestUpdateContentFile(t *testing.T) {
 	assert.Equal(t, false, res.Created)
 }
 
-func TestErrorUpdatingContentFile(t *testing.T) {
+func TestUpdateIssueTemplate(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent"](),
+		mocks["UpdateFileContent"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/issue_template.json",
+		Branches: []string{"main"},
+	}
+
+	res, err := Run(rt, opts)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "leocomelli/ght", res.Fullname)
+	assert.Equal(t, false, res.Created)
+}
+
+func TestErrorUpdatingPullRequestTemplate(t *testing.T) {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mocks["GetRepo"](),
 		mocks["GetFileContent"](),
@@ -715,6 +737,29 @@ func TestErrorUpdatingContentFile(t *testing.T) {
 		Owner:    "leocomelli",
 		Name:     "ght",
 		Template: "./testing/pr_template.json",
+		Branches: []string{"main"},
+	}
+
+	_, err := Run(rt, opts)
+
+	assert.NotNil(t, err)
+	err = errors.Unwrap(err)
+	assert.IsType(t, &github.ErrorResponse{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*github.ErrorResponse).Response.StatusCode)
+}
+
+func TestErrorUpdatingIssueTemplate(t *testing.T) {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mocks["GetRepo"](),
+		mocks["GetFileContent"](),
+		mocks["UpdateFileContent_400"](),
+	)
+
+	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}
+	opts := &RepoOptions{
+		Owner:    "leocomelli",
+		Name:     "ght",
+		Template: "./testing/issue_template.json",
 		Branches: []string{"main"},
 	}
 

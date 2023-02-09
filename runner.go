@@ -12,6 +12,11 @@ import (
 	"github.com/google/go-github/v50/github"
 )
 
+const (
+	PullRequestTemplate = ".github/pull_request_template.md"
+	IssueTemplate       = ".github/issue_template.md"
+)
+
 var (
 	// ErrRepoConfigNotFound is returned when no repository section is found in the template file
 	ErrRepoConfigNotFound = errors.New("no repository section in template file")
@@ -62,14 +67,16 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 		}
 	}
 
-	// Configure issue templates
+	// Configure issue template
 	if cfg.PullRequestTemplate != "" {
-		prTmplData, err := Data(cfg.PullRequestTemplate)
-		if err != nil {
+		if err := CreateOrUpdateContent(rt, opts.Owner, opts.Name, PullRequestTemplate, cfg.PullRequestTemplate); err != nil {
 			return nil, err
 		}
+	}
 
-		if err := rt.CreateUpdateContent(opts.Owner, opts.Name, ".github/pull_request_template.md", prTmplData); err != nil {
+	// Issue issue template
+	if cfg.IssueTemplate != "" {
+		if err := CreateOrUpdateContent(rt, opts.Owner, opts.Name, IssueTemplate, cfg.IssueTemplate); err != nil {
 			return nil, err
 		}
 	}
@@ -82,6 +89,19 @@ func Run(rt *RepoTemplate, opts *RepoOptions) (*RepoResponse, error) {
 	}
 
 	return res, nil
+}
+
+func CreateOrUpdateContent(rt *RepoTemplate, owner, repo, ghPath, path string) error {
+	prTmplData, err := Data(path)
+	if err != nil {
+		return err
+	}
+
+	if err := rt.CreateUpdateContent(owner, repo, ghPath, prTmplData); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // LoadRepoConfig loads the repository config from a file or url

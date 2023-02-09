@@ -28,6 +28,7 @@ type Config struct {
 	TemplateRepo          *github.TemplateRepoRequest `json:"template_repo"`
 	RequiredSignedCommits bool                        `json:"required_signed_commits"`
 	PullRequestTemplate   string                      `json:"pull_request_template"`
+	IssueTemplate         string                      `json:"issue_template"`
 }
 
 var (
