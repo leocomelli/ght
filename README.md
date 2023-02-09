@@ -72,7 +72,7 @@ Using this template file, a new repository will be created (or updated if it alr
     "enforce_admins": true
   },
   "required_signed_commits": true,
-  "pull_request_template": "https://raw.githubusercontent.com/leocomelli/ght/main/examples/pr_template.md"
+  "pull_request_template": "https://raw.githubusercontent.com/leocomelli/ght/main/examples/pr_template.md",
   "issue_template": "https://raw.githubusercontent.com/leocomelli/ght/main/examples/issue_template.md"
 }
 ```
