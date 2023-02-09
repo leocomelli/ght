@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -31,7 +32,20 @@ type Config struct {
 	IssueTemplate         string                      `json:"issue_template"`
 }
 
+const tmpl = `
+Version: %s
+BuildDate: %s
+GitCommit: %s
+`
+
 var (
+	// Version contains the current version of the app.
+	Version = ""
+	// BuildDate contains the date and time of build process.
+	BuildDate = ""
+	// GitHash contains the hash of last commit in the repository.
+	GitHash = ""
+
 	logger zerolog.Logger
 	opts   *RepoOptions
 )
@@ -91,7 +105,17 @@ func command() *cobra.Command {
 	_ = repo.MarkFlagRequired("name")
 	_ = repo.MarkFlagRequired("template")
 
+	version := &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of ght",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Printf(tmpl, Version, BuildDate, GitHash)
+			return nil
+		},
+	}
+
 	root.AddCommand(repo)
+	root.AddCommand(version)
 
 	return root
 }
