@@ -3,7 +3,7 @@ module github.com/leocomelli/ght
 go 1.19
 
 require (
-	github.com/google/go-github/v50 v50.0.0
+	github.com/google/go-github/v50 v50.1.0
 	github.com/migueleliasweb/go-github-mock v0.0.16
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
