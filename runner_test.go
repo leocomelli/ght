@@ -162,6 +162,14 @@ var mocks = map[string]func() mock.MockBackendOption{
 			}),
 		)
 	},
+	"DeleteBranchProtectionSignCommit": func() mock.MockBackendOption {
+		return mock.WithRequestMatchHandler(
+			mock.DeleteReposBranchesProtectionRequiredSignaturesByOwnerByRepoByBranch,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusOK, "200 OK")
+			}),
+		)
+	},
 	"GetFileContent": func() mock.MockBackendOption {
 		return mock.WithRequestMatch(
 			mock.GetReposContentsByOwnerByRepoByPath,
@@ -471,6 +479,7 @@ func TestCreateRepoWithBranchProtection(t *testing.T) {
 		mocks["ReplaceTopics"](),
 		mocks["GetBranch"](),
 		mocks["UpdateBranchProtection"](),
+		mocks["DeleteBranchProtectionSignCommit"](),
 	)
 
 	rt := &RepoTemplate{client: github.NewClient(mockedHTTPClient)}

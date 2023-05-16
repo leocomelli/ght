@@ -149,8 +149,12 @@ func (r *RepoTemplate) BranchProtectionRules(owner, repo string, branches []stri
 		}
 
 		if signedCommits {
-			if err := r.BranchCommitSignProtection(owner, repo, branch); err != nil {
+			if err := r.CreateBranchCommitSignProtection(owner, repo, branch); err != nil {
 				return fmt.Errorf("failed to set branch protection rules for signed commits on %s |→ %w", branch, err)
+			}
+		} else {
+			if err := r.DeleteBranchCommitSignProtection(owner, repo, branch); err != nil {
+				return fmt.Errorf("failed to delete branch protection rules for signed commits on %s |→ %w", branch, err)
 			}
 		}
 	}
@@ -158,15 +162,31 @@ func (r *RepoTemplate) BranchProtectionRules(owner, repo string, branches []stri
 	return nil
 }
 
-// BranchCommitSignProtection sets branch protection rules for signed commits.
+// CreateBranchCommitSignProtection sets branch protection rules for signed commits.
 //
-// Github API docs: https://docs.github.com/en/rest/reference/repos#require-commit-signature-protection
-func (r *RepoTemplate) BranchCommitSignProtection(owner, repo string, branch string) error {
+// Github API docs: https://docs.github.com/en/rest/branches/branch-protection#require-commit-signature-protection
+func (r *RepoTemplate) CreateBranchCommitSignProtection(owner, repo string, branch string) error {
 	ctx := context.Background()
 
 	logger.Debug().Msgf("setting branch protection rules for signed commits on %s", branch)
 
 	_, _, err := r.client.Repositories.RequireSignaturesOnProtectedBranch(ctx, owner, repo, branch)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteBranchCommitSignProtection deletes branch protection rules for signed commits.
+//
+// Github API docs: https://docs.github.com/en/rest/branches/branch-protection#delete-commit-signature-protection
+func (r *RepoTemplate) DeleteBranchCommitSignProtection(owner, repo string, branch string) error {
+	ctx := context.Background()
+
+	logger.Debug().Msgf("making signed commits optional on %s", branch)
+
+	_, err := r.client.Repositories.OptionalSignaturesOnProtectedBranch(ctx, owner, repo, branch)
 	if err != nil {
 		return err
 	}
