@@ -7,7 +7,7 @@ require (
 	github.com/migueleliasweb/go-github-mock v0.0.22
 	github.com/rs/zerolog v1.30.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
